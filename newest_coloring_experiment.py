@@ -4,8 +4,8 @@ from itertools import combinations
 from tqdm import tqdm
 
 # delta = 250
-lmbda = 1.8089
-p1, p2, p3, p4, p5, p6, p7 = 1, 0.324, 0.154, 0.088, 0.044, 0.011, 0
+lmbda = 1.806858
+p1, p2, p3, p4, p5, p6, p7 = 1, 1/3, 0.1534, 1/12, 0.0366, 0.00155, 0
 
 
 def stars_and_bars(n, k):
@@ -28,7 +28,7 @@ def score_5(combo, delta, print_=False, eta_guess_=None):
         eta = eta_guess_ / delta
     else:
         # eta = eta_guess_ * (1 / 2) * (1 / k)
-        eta = 0.0469 / delta
+        eta = 0.049219 / delta
         # eta = 0.047357 / delta
         # eta = 0.05 / delta
 
@@ -85,7 +85,7 @@ def score_5(combo, delta, print_=False, eta_guess_=None):
     return 1 + ((prob_term + lambda_sum) / delta)
 
 def main():
-    mode = input("Choose mode: [1] Max Combo Search, [2] Eta Binary Search: ").strip()
+    mode = input("Choose mode: [1] Max Combo Search, [2] Eta Binary Search, [3] Max Over (Presumed) Extremal Cases: ").strip()
 
     delta = int(input("Please enter a value for delta: "))
     num_vars = 10
@@ -134,6 +134,19 @@ def main():
             print(f"Found eta_guess: {best_eta:.6f} where score1 > score2")
         else:
             print("No eta_guess in [0, 1] satisfies score1 > score2")
+
+    elif mode == "3":
+        eta = 0.049219
+        num_vars = 10
+        max_comb, max_v = [], 0
+        for i in range(num_vars):
+            combo = tuple([delta if j == i  else 0 for j in range(num_vars)])
+            val = score_5(combo, delta, eta_guess_=eta)
+            if val > max_v:
+                max_comb = combo
+                max_v = val
+
+        print(max_comb)
 
     else:
         print("Invalid mode selected.")
