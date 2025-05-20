@@ -4,7 +4,7 @@ from itertools import combinations
 from tqdm import tqdm
 
 # delta = 250
-lmbda = 1.806858
+lmbda = 1.806536
 p1, p2, p3, p4, p5, p6, p7 = 1, 1/3, 0.1534, 1/12, 0.0366, 0.00155, 0
 
 
@@ -92,11 +92,12 @@ def main():
 
     if mode == "1":
         count = 0
+        eta = 0.049837
         max_combo, max_val = (), -float("inf")
         total_itrs = math.comb(delta + num_vars - 1, num_vars - 1)
 
         for combo in tqdm(stars_and_bars(delta, num_vars), total=total_itrs, desc="Processing"):
-            score = score_5(combo, delta, eta_guess_=0.008)
+            score = score_5(combo, delta, eta_guess_=eta)
             if score > max_val:
                 max_combo, max_val = combo, score
             count += 1
@@ -136,12 +137,13 @@ def main():
             print("No eta_guess in [0, 1] satisfies score1 > score2")
 
     elif mode == "3":
-        eta = 0.049219
+        eta = 0.049837
         num_vars = 10
         max_comb, max_v = [], 0
         for i in range(num_vars):
             combo = tuple([delta if j == i  else 0 for j in range(num_vars)])
             val = score_5(combo, delta, eta_guess_=eta)
+            print(i, val)
             if val > max_v:
                 max_comb = combo
                 max_v = val
