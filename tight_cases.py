@@ -1,16 +1,13 @@
 import math
 from itertools import combinations
-from pulp import *
 
 from tqdm import tqdm
 from gurobipy import Model, GRB, quicksum
 
-solver = PULP_CBC_CMD(msg=False, options=["feasibilitypump"])
-
-delta = int(1e12)
-lmbda = 1.8065361
-p1, p2, p3, p4, p5, p6, p7 = 1, 1/3, 0.15326805, 1/12, 0.036710189, 0.0017428313, 0
-eta_g = 0.049837032972
+delta = int(1e30)
+lmbda = 1.80653622916876721582468690030
+p1, p2, p3, p4, p5, p6, p7 = 1, 1/3, 0.15326836257550522, 1/12, 0.03671039382375485, 0.0017430031982297372, 0
+eta_g = 0.049837077123186322713532803164
 # lmbda = 1.8089
 # eta_g = 0.0469
 # p1, p2, p3, p4, p5, p6, p7 = 1, 0.324, 0.154, 0.088, 0.044, 0.011, 0
@@ -22,6 +19,7 @@ def maximize():
 
     model = Model("maximize_score")
     model.setParam("OutputFlag", 0)
+    model.setParam("BarConvTol", 1e-30)
 
     d_names = [
         "d_1_0", "d_1_1", "d_2_00", "d_2_10", "d_2_01", "d_2_11",
@@ -31,6 +29,9 @@ def maximize():
     d_vars = {name: model.addVar(lb=0, ub=1, name=name) for name in d_names}
 
     model.addConstr(quicksum(d_vars.values()) == 1, "Sum_to_1")
+    # model.addConstr(d_vars["d_1_1"] == 1) # DEBUGGING
+    # model.addConstr(d_vars["d_1_2"] == 1) # DEBUGGING
+    model.addConstr(d_vars["d_2_22"] == 1) # DEBUGGING
 
     pr_ev = (
         lmbda
@@ -44,7 +45,8 @@ def maximize():
         )
     )
 
-    eta_cost = eta * (d_vars["d_1_0"] + d_vars["d_2_00"] + 0.5 * (d_vars["d_2_10"] + d_vars["d_2_01"]))
+    # eta_cost = eta * (d_vars["d_1_0"] + d_vars["d_2_00"] + 0.5 * (d_vars["d_2_10"] + d_vars["d_2_01"]))
+    eta_cost = eta_g * (d_vars["d_1_0"] + d_vars["d_2_00"] + 0.5 * (d_vars["d_2_10"] + d_vars["d_2_01"]))
     prob_term = pr_ev * eta_cost
 
     lambda_1_0 = 1 - p2 + eta * (1 + p2) * delta
